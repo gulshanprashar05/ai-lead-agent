@@ -1,9 +1,23 @@
+const http = require("http");
 const WebSocket = require("ws");
 
-const PORT = 5001;
+const PORT = process.env.PORT || 5001;
+
+const server = http.createServer((req, res) => {
+  res.writeHead(200, {
+    "Content-Type": "application/json",
+  });
+
+  res.end(
+    JSON.stringify({
+      success: true,
+      message: "AI Voice WebSocket Server is running",
+    })
+  );
+});
 
 const wss = new WebSocket.Server({
-  port: PORT,
+  server,
 });
 
 console.log(`Voice WebSocket server running on port ${PORT}`);
@@ -31,7 +45,7 @@ wss.on("connection", (ws) => {
         console.log("Called:", data.start.to);
       }
 
-      // Audio received from caller
+      // Audio received
       if (data.event === "media") {
         console.log("Audio received");
       }
@@ -40,9 +54,11 @@ wss.on("connection", (ws) => {
       if (data.event === "stop") {
         console.log("Exotel call ended");
       }
-
     } catch (error) {
-      console.error("WebSocket message error:", error.message);
+      console.error(
+        "WebSocket message error:",
+        error.message
+      );
     }
   });
 
@@ -51,6 +67,13 @@ wss.on("connection", (ws) => {
   });
 
   ws.on("error", (error) => {
-    console.error("WebSocket error:", error.message);
+    console.error(
+      "WebSocket error:",
+      error.message
+    );
   });
+});
+
+server.listen(PORT, "0.0.0.0", () => {
+  console.log(`Voice server listening on port ${PORT}`);
 });
